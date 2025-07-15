@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境
+venv/
+env/
+
+# 数据文件(不存储)
+data/
+output/
+
+# IDE文件
+.idea/
+.vscode/
+*.ipynb*
+
+# 驱动(不存储)
+drivers/
