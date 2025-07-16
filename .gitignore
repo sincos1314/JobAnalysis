@@ -8,10 +8,6 @@ __pycache__/
 venv/
 env/
 
-# 数据文件(不存储)
-data/
-output/
-
 # IDE文件
 .idea/
 .vscode/
