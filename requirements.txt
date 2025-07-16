@@ -1,6 +1,7 @@
 altair==5.5.0
 asgiref==3.9.1
 attrs==25.3.0
+beautifulsoup4
 blinker==1.9.0
 cachetools==6.1.0
 certifi==2025.7.14
@@ -21,6 +22,7 @@ idna==3.10
 Jinja2==3.1.6
 jsonschema==4.24.0
 jsonschema-specifications==2025.4.1
+lxml
 MarkupSafe==3.0.2
 narwhals==1.47.0
 numpy==2.3.1
@@ -40,6 +42,7 @@ six==1.17.0
 smmap==5.0.2
 sqlparse==0.5.3
 streamlit==1.46.1
+selenium
 tenacity==9.1.2
 toml==0.10.2
 tornado==6.5.1
@@ -47,3 +50,6 @@ typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==2.5.0
 watchdog==6.0.0
+# 数据分析与可视化依赖
+matplotlib
+wordcloud
