@@ -171,6 +171,8 @@ streamlit run app.py
 
 ![Streamlit应用界面展示1](docs/demo1.png)  
 ![Streamlit应用界面展示2](docs/demo2.png)  
+*▲ Streamlit应用界面展示*
+
 ---
 
 ## 💡 使用建议  
