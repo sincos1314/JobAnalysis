@@ -9,28 +9,82 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # --- 清洗函数 ---
-def parse_salary_unit(s):
-    if pd.isna(s): return np.nan
-    # 在提取数字前，先去掉 ·xx薪 这种描述
-    s = str(s).split('·')[0]
-    number = re.findall(r'(\d+\.?\d*)', s)
-    if not number: return np.nan
-    number = float(number[0])
-    if '万' in s: return number * 10
-    if '千' in s: return number
-    return number if number > 100 else number * 10
+def parse_salary_value(num_str, unit):
+    """根据明确的单位来解析数值"""
+    try:
+        num = float(num_str)
+        if unit == '万':
+            return num * 10  # 统一转换为千
+        if unit == '千':
+            return num
+        if unit == '元/天':
+            return num * 21.75 / 1000 # 按每月21.75个工作日计算，并转换为千
+        return num # 如果没有单位，则假定为千
+    except (ValueError, TypeError):
+        return np.nan
 
 def clean_salary(salary_str):
-    if pd.isna(salary_str): return np.nan, np.nan
-    salary_str, is_annual = str(salary_str).strip(), '年' in salary_str
-    parts = salary_str.split('-')
-    try:
-        min_val = parse_salary_unit(parts[0])
-        max_val = parse_salary_unit(parts[1] if len(parts) > 1 else parts[0])
-        if is_annual: min_val, max_val = min_val / 12, max_val / 12
-        return round(min_val, 1), round(max_val, 1)
-    except:
+    """
+    【最终健壮版】薪资清洗函数，能正确处理单位不一致和日薪等复杂情况。
+    """
+    if pd.isna(salary_str) or not isinstance(salary_str, str) or '面议' in salary_str:
         return np.nan, np.nan
+
+    salary_str = salary_str.strip()
+    
+    # 优先处理日薪情况
+    if '元/天' in salary_str:
+        nums = re.findall(r'(\d+\.?\d*)', salary_str)
+        if nums:
+            daily_salary = float(nums[0])
+            # 将日薪转换为月薪（千元单位）
+            monthly_k = daily_salary * 21.75 / 1000
+            return round(monthly_k, 1), round(monthly_k, 1)
+        return np.nan, np.nan
+
+    # 识别主要单位（万、千）
+    unit = '千' # 默认单位
+    if '万' in salary_str:
+        unit = '万'
+    
+    # 去掉福利描述，如 "·15薪"
+    salary_str = salary_str.split('·')[0]
+    
+    # 提取所有数字部分
+    nums = re.findall(r'(\d+\.?\d*)', salary_str)
+    
+    if len(nums) == 0:
+        return np.nan, np.nan
+    
+    if len(nums) == 1:
+        # 单个薪资，如 "1.5万"
+        val = parse_salary_value(nums[0], unit)
+        return round(val, 1), round(val, 1)
+    
+    if len(nums) >= 2:
+        # 薪资范围，如 "1-1.5万" 或 "8千-1.2万"
+        min_val_str, max_val_str = nums[0], nums[1]
+        
+        # 关键逻辑：如果max_val_str后面有'万'，则min_val_str也应该按'万'处理
+        # 适用于 "8千-1.2万" -> 8千, 12千 的情况
+        temp_parts = salary_str.split('-')
+        min_unit = '千' if '千' in temp_parts[0] else unit
+        max_unit = '万' if '万' in temp_parts[1] else unit
+
+        # 如果最大值单位是万，最小值单位是千，但最小值大于10（不合理），则认为它也是万
+        if max_unit == '万' and min_unit == '千' and float(min_val_str) > 10:
+             min_unit = '万'
+        
+        # 修正 "1-1.5万" 的情况，让 '1' 继承 '万' 的单位
+        if '万' in temp_parts[1] and '千' not in temp_parts[0] and '万' not in temp_parts[0]:
+            min_unit = '万'
+
+        min_val = parse_salary_value(min_val_str, min_unit)
+        max_val = parse_salary_value(max_val_str, max_unit)
+        
+        return round(min_val, 1), round(max_val, 1)
+        
+    return np.nan, np.nan
 
 def process_data(input_path, output_path):
     """【最终健壮版】完整的数据清洗和处理流程"""
@@ -55,11 +109,12 @@ def process_data(input_path, output_path):
     df.rename(columns={
         'jobTitle': '职位名称', 'companyName': '公司名称', 'jobYear': '经验要求',
         'jobDegree': '学历要求', 'companyTypeString': '公司性质', 'companySizeString': '公司规模',
-        'jobLabel': '技能标签', 'jobHref': '详情链接', 'city': '城市'
+        'jobLabel': '技能标签', 'jobHref': '详情链接', 'city': '城市','min_salary': '最低薪资',
+        'max_salary': '最高薪资','avg_salary': '平均薪资'
     }, inplace=True)
     
     final_cols = [
-        '职位名称', '公司名称', '城市', 'min_salary', 'max_salary', 'avg_salary',
+        '职位名称', '公司名称', '城市', '最低薪资', '最高薪资', '平均薪资',
         '经验要求', '学历要求', '公司性质', '公司规模', '技能标签', '详情链接'
     ]
     df_cleaned = df[[col for col in final_cols if col in df.columns]]
@@ -81,7 +136,7 @@ def analyze_and_visualize(df, output_dir):
     plt.xticks(rotation=45, ha='right'); plt.tight_layout(); plt.savefig(f'{output_dir}/job_counts_by_city.png')
     print("已生成 '岗位数量Top10城市' 图表。")
 
-    city_salary = df[df['城市'].isin(city_counts.index)].groupby('城市')['avg_salary'].mean().sort_values(ascending=False)
+    city_salary = df[df['城市'].isin(city_counts.index)].groupby('城市')['平均薪资'].mean().sort_values(ascending=False)
     plt.figure(figsize=(12, 7)); sns.barplot(x=city_salary.index, y=city_salary.values, palette='plasma')
     plt.title('Top10热门城市平均薪资 (千/月)', fontsize=16); plt.xlabel('城市', fontsize=12); plt.ylabel('平均薪资 (K/月)', fontsize=12)
     plt.xticks(rotation=45, ha='right'); plt.tight_layout(); plt.savefig(f'{output_dir}/salary_by_city.png')
