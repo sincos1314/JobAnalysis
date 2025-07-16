@@ -169,6 +169,8 @@ streamlit run app.py
 ![Top10热门地区评价薪资](output/salary_by_city.png)  
 *▲ 城市职位布图*
 
+![Streamlit应用界面展示1](docs/demo1.png)  
+![Streamlit应用界面展示2](docs/demo2.png)  
 ---
 
 ## 💡 使用建议  
