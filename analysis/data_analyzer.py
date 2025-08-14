@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
+from pathlib import Path
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -156,14 +157,21 @@ def analyze_and_visualize(df, output_dir):
         print("无有效的技能标签数据，跳过生成词云。")
 
 if __name__ == '__main__':
-    RAW_DATA_PATH = '../data/jobs_raw.csv'
-    CLEANED_DATA_PATH = '../data/jobs_cleaned.csv'
-    OUTPUT_DIR = '../output'
+    # 从 analysis 目录上升到项目根目录
+    BASE_DIR = Path(__file__).resolve().parent.parent 
     
+    # 定义数据文件和输出目录的绝对路径
+    RAW_DATA_PATH = BASE_DIR / 'data' / 'jobs_raw.csv'
+    CLEANED_DATA_PATH = BASE_DIR / 'data' / 'jobs_cleaned.csv'
+    OUTPUT_DIR = BASE_DIR / 'output'
+
+    print(f"🚀 开始处理数据: {RAW_DATA_PATH}")
     cleaned_df = process_data(RAW_DATA_PATH, CLEANED_DATA_PATH)
     
     if cleaned_df is not None and not cleaned_df.empty:
+        print("✅ 数据清洗完成。")
+        print("📊 开始生成分析图表...")
         analyze_and_visualize(cleaned_df, OUTPUT_DIR)
-        print("\n所有分析图表已生成并保存到 'output' 目录。")
+        print(f"\n🎉 所有分析图表已生成并保存到 '{OUTPUT_DIR}' 目录。")
     else:
-        print("\n数据处理后为空，无法进行分析。请检查原始数据。")
+        print("\n🛑 数据处理失败或处理后为空，无法进行分析。")

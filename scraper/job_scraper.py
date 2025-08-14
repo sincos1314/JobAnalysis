@@ -3,6 +3,7 @@ import json
 import time
 import random
 from bs4 import BeautifulSoup
+from pathlib import Path
 import os
 
 # 引入Selenium相关模块
@@ -16,7 +17,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 # --- 核心配置 ---
 SEARCH_URL = "https://we.51job.com/pc/search"
 
-# TODO: 请在这里填入你从浏览器中【重新复制】的、最新的Cookie字符串
+# 请在这里填入你从浏览器中获得的最新的Cookie字符串
 COOKIES_STR = '' # 例如: 'acw_tc=...; ssxmod_itp=...;'
 
 def parse_cookies(cookies_str):
@@ -140,15 +141,32 @@ def get_job_info_with_selenium(keyword, pages):
     return df[existing_columns]
 
 if __name__ == '__main__':
+    # --- 1. 参数设定 ---
     search_keyword = 'Python'
     total_pages = 50 # 设定目标抓取50页
     
+    # --- 2. 执行核心爬虫逻辑 ---
+    print(f"🚀 开始抓取关键词为 '{search_keyword}' 的职位信息，目标页数：{total_pages}...")
     df_raw = get_job_info_with_selenium(search_keyword, total_pages)
     
+    # --- 3. 数据处理与保存 ---
     if not df_raw.empty:
-        output_path = '../data/jobs_raw.csv'
+        # 构建绝对、可靠的路径
+        BASE_DIR = Path(__file__).resolve().parent.parent # .parent.parent 从 scraper 目录返回到项目根目录
+        DATA_DIR = BASE_DIR / 'data'
+        
+        # 在写入文件前，确保目录存在
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        
+        # 定义最终输出文件的完整路径
+        output_path = DATA_DIR / 'jobs_raw.csv'
+        
+        # 安全地保存文件
         df_raw.to_csv(output_path, index=False, encoding='utf-8-sig')
-        print(f"\n【成功】数据抓取与去重完成！")
-        print(f"最终获得 {len(df_raw)} 条有效职位数据已保存至 '{output_path}'")
+        
+        # --- 4. 任务总结 ---
+        print(f"\n✅ 【成功】数据抓取完成！")
+        print(f"📈 最终获得 {len(df_raw)} 条有效职位数据。")
+        print(f"💾 数据已保存至: {output_path}")
     else:
-        print("\n【任务结束】未能获取任何数据，请检查错误日志。")
+        print("\n⚠️ 【任务结束】未能获取任何数据，请检查网络或爬虫逻辑。")

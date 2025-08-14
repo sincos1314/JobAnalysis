@@ -43,6 +43,7 @@ smmap==5.0.2
 sqlparse==0.5.3
 streamlit==1.46.1
 selenium
+seaborn
 tenacity==9.1.2
 toml==0.10.2
 tornado==6.5.1

@@ -3,14 +3,25 @@ import pandas as pd
 import os
 
 # 获取当前app.py文件所在的目录
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 基于该目录构建数据和图表文件的【绝对路径】
-CLEANED_DATA_PATH = os.path.join(BASE_DIR, 'data', 'jobs_cleaned.csv')
-CITY_COUNT_IMG_PATH = os.path.join(BASE_DIR, 'output', 'job_counts_by_city.png')
-CITY_SALARY_IMG_PATH = os.path.join(BASE_DIR, 'output', 'salary_by_city.png')
-SKILLS_WORDCLOUD_IMG_PATH = os.path.join(BASE_DIR, 'output', 'skills_wordcloud.png')
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+CLEANED_DATA_PATH = os.path.join(DATA_DIR, 'jobs_cleaned.csv')
+OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
+CITY_COUNT_IMG_PATH = os.path.join(OUTPUT_DIR, 'job_counts_by_city.png')
+CITY_SALARY_IMG_PATH = os.path.join(OUTPUT_DIR, 'salary_by_city.png')
+SKILLS_WORDCLOUD_IMG_PATH = os.path.join(OUTPUT_DIR, 'skills_wordcloud.png')
 
+# 创建 data 文件夹 (如果它不存在)
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+    print(f"📂 目录 '{DATA_DIR}' 已创建。")
+
+# 创建 output 文件夹 (如果它不存在)
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+    print(f"📂 目录 '{OUTPUT_DIR}' 已创建。")
 
 # --- 页面主逻辑 ---
 st.set_page_config(page_title="Python职位市场分析看板", layout="wide")
