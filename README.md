@@ -124,6 +124,26 @@ source venv/bin/activate
 # 安装依赖
 pip install -r requirements.txt
 ```
+```txt
+# 查看自己的chrome浏览器版本
+在网址栏里输入chrome://settings/help，
+然后选择最下面的“关于chrome”就能看到自己的chrome浏览器版本了
+如下图所示：
+```
+![chrome版本查看](docs/查看chrome版本.png)
+```txt
+# 安装一个chromedriver
+打开https://developer.chrome.com/docs/chromedriver/downloads?hl=zh-cn网站，
+选择一个适合自己谷歌浏览器版本的chromedriver进行下载，
+新版的chromedriver可以在网站https://googlechromelabs.github.io/chrome-for-testing/上找到。
+```
+![网站详情图1](docs/网站详情图1.png)  
+![网站详情图2](docs/网站详情图2.png) 
+*▲ chromedriver网站详情图*
+```txt
+# 将drivers文件夹粘贴到你克隆的文件根目录下，如下图所示：
+```
+![drivers文件夹放置位置图](docs/drivers文件夹放置位置图.png)
 
 ### 第二阶段：爬虫配置（关键步骤）
 ```bash
